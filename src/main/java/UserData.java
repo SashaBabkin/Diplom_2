@@ -1,16 +1,21 @@
-public class UserCreateData {
+public class UserData {
 
     private String email;
     private String password;
     private String name;
 
-    public UserCreateData(String email, String password, String name) {
+    public UserData(String email, String password, String name) {
         this.email = email;
         this.password = password;
         this.name = name;
     }
 
-    public UserCreateData() {}
+    public UserData(String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
+
+    public UserData() {}
 
     public String getEmail() {
         return email;
