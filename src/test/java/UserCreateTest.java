@@ -4,16 +4,10 @@ import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.equalTo;
-
 public class UserCreateTest {
 
-    private String email = "testSasha1@yandex.ru";
-    private String password = "1234567";
-    private String name = "Sasha";
-    private String noEmail;
-    private String noPassword;
-    private String noName;
+    UserData userData = UserGenerate.getRandomUser();
+    UserData userLogin = new UserData(userData.getEmail(), userData.getPassword());
 
     UserApi userApi = new UserApi();
 
@@ -21,7 +15,6 @@ public class UserCreateTest {
     @DisplayName("Create User with valid data")
     @Description("Positive test of creating User using valid data")
     public void userCreatedWithValidDataTest() {
-        UserData userData = new UserData(email, password, name);
         Response response = userApi.sendPostRequestToCreateUser(userData);
         userApi.checkResponseAfterCreatingUser(response);
 
@@ -31,7 +24,6 @@ public class UserCreateTest {
     @DisplayName("Error trying to create two identical users")
     @Description("Negative test of no opportunity creating two users with identical data")
     public void notPossibleToCreateTwoIdenticalUsersTest() {
-        UserData userData = new UserData(email, password, name);
         userApi.sendPostRequestToCreateUser(userData);
         Response response = userApi.sendPostRequestToCreateUser(userData);
         userApi.checkResponseAfterCreatingTwoIdenticalUsers(response);
@@ -41,8 +33,8 @@ public class UserCreateTest {
     @DisplayName("Error trying to create User with email missing")
     @Description("Negative test of no opportunity creating User with email missing")
     public void notPossibleToCreateCourierWithEmailMissingTest() {
-        UserData userData = new UserData(noEmail, password, name);
-        Response response = userApi.sendPostRequestToCreateUser(userData);
+        UserData userWithoutEmail = new UserData("", "1234567", "Sasha");
+        Response response = userApi.sendPostRequestToCreateUser(userWithoutEmail);
         userApi.checkResponseAfterCreatingUserWithRequiredFieldsMissing(response);
     }
 
@@ -50,8 +42,8 @@ public class UserCreateTest {
     @DisplayName("Error trying to create User with password missing")
     @Description("Negative test of no opportunity creating User with password missing")
     public void notPossibleToCreateCourierWithPasswordMissingTest() {
-        UserData userData = new UserData(email, noPassword, name);
-        Response response = userApi.sendPostRequestToCreateUser(userData);
+        UserData userWithoutPassword = new UserData("sashaTest123@test.ru", "", "Sasha");
+        Response response = userApi.sendPostRequestToCreateUser(userWithoutPassword);
         userApi.checkResponseAfterCreatingUserWithRequiredFieldsMissing(response);
     }
 
@@ -59,15 +51,14 @@ public class UserCreateTest {
     @DisplayName("Error trying to create User with name missing")
     @Description("Negative test of no opportunity creating User with name missing")
     public void notPossibleToCreateCourierWithNameMissingTest() {
-        UserData userData = new UserData(email, password, noName);
-        Response response = userApi.sendPostRequestToCreateUser(userData);
+        UserData userWithoutName = new UserData("sashaTest123@test.ru", "1234567", "");
+        Response response = userApi.sendPostRequestToCreateUser(userWithoutName);
         userApi.checkResponseAfterCreatingUserWithRequiredFieldsMissing(response);
     }
 
     @After
     public void deleteUser() {
-        UserData userData = new UserData(email, password);
-        Response response = userApi.sendPostRequestToLoginUser(userData);
+        Response response = userApi.sendPostRequestToLoginUser(userLogin);
         if (response.then().extract().statusCode() == 200) {
             String authToken = response.then().extract().body().path("accessToken");
             userApi.deleteUser(authToken);

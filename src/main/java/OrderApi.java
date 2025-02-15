@@ -48,7 +48,7 @@ public class OrderApi extends BaseHttpClient {
     //Проверка ответа после создания заказа
     @Step("Check Response after creating Order")
     public void checkResponseAfterCreatingOrder(Response response) {
-        response.then().assertThat().body("success", equalTo(true));
+        response.then().assertThat().statusCode(200).and().body("success", equalTo(true));
     }
 
     //Проверка ответа после отправки запроса на создание заказа без ингредиентов
@@ -78,13 +78,13 @@ public class OrderApi extends BaseHttpClient {
     //Проверка ответа после отправки запроса на получение списка заказов авторизированного пользователя
     @Step("Check Response after getting Order's list of authorized User")
     public void checkResponseAfterGettingUserOrdersAuth(Response response) {
-        response.then().assertThat().body("success", equalTo(true));
+        response.then().assertThat().statusCode(200).and().body("success", equalTo(true));
     }
 
     //Проверка ответа после отправки запроса на получение списка заказов неавторизированного пользователя
     @Step("Check Response after getting Order's list of not-authorized User")
     public void checkResponseAfterGettingUserOrdersNotAuth(Response response) {
-        response.then().assertThat().body("message", equalTo("You should be authorised"));
+        response.then().assertThat().statusCode(401).and().body("message", equalTo("You should be authorised"));
     }
 
 }

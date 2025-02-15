@@ -31,7 +31,7 @@ public class UserApi extends BaseHttpClient {
     //Проверка ответа после создания пользователя
     @Step("Check Response after creating User")
     public void checkResponseAfterCreatingUser(Response response) {
-        response.then().assertThat().body("success", equalTo(true));
+        response.then().assertThat().statusCode(200).and().body("success", equalTo(true));
     }
 
     //Проверка ответа после попытки создания двух одинаковых пользователей
@@ -86,7 +86,18 @@ public class UserApi extends BaseHttpClient {
     //Проверка ответа после изменений данных пользователя с авторизацией
     @Step("Check Response after update User Data")
     public void checkResponseAfterUpdateUserData(Response response) {
-        response.then().assertThat().body("success", equalTo(true));
+        response.then().assertThat().statusCode(200).and().body("success", equalTo(true));
+    }
+    //Проверка ответа после изменения почты пользователя
+    @Step("Check response after update User's email")
+    public void checkResponseBodyAfterUpdateUserEmail(Response response, String newEmail) {
+        response.then().assertThat().body("user.email", equalTo(newEmail));
+    }
+
+    //Проверка ответа после изменения имени пользователя
+    @Step("Check response after update User's Name")
+    public void checkResponseBodyAfterUpdateUserName(Response response, String newName) {
+        response.then().assertThat().body("user.name", equalTo(newName));
     }
 
     //Проверка ответа после попытки изменения данных пользователя без передачи токена авторизации
@@ -102,6 +113,7 @@ public class UserApi extends BaseHttpClient {
     }
 
     //Удаление пользователя
+    @Step("Deleting User")
     public void deleteUser(String accessToken) {
         Response response =
                 given()

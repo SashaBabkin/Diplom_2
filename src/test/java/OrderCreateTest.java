@@ -1,6 +1,8 @@
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -9,6 +11,21 @@ import java.util.List;
 public class OrderCreateTest {
 
     OrderApi orderApi = new OrderApi();
+    UserApi userApi = new UserApi();
+
+    UserData userData = UserGenerate.getRandomUser();
+    UserData userLogin = new UserData(userData.getEmail(), userData.getPassword());
+
+    String authToken;
+
+
+    @Before
+    public void createUser() {
+
+        Response response = userApi.sendPostRequestToCreateUser(userData);
+        authToken = response.then().extract().body().path("accessToken");
+
+    }
 
     @Test
     @DisplayName("Create Order with valid ingredients ids and no authorization")
@@ -38,18 +55,11 @@ public class OrderCreateTest {
         List<String> ingredientsInOrder = new ArrayList<>();
         ingredientsInOrder.add(allIngredients.get(0));
         ingredientsInOrder.add(allIngredients.get(1));
-        //Создание пользователя
-        UserData userData = new UserData("testSasha1@yandex.ru", "1234567", "Sasha");
-        UserApi userApi = new UserApi();
-        Response response1 = userApi.sendPostRequestToCreateUser(userData);
-        //Получение Токена созданного Пользователя
-        String authToken = response1.then().extract().body().path("accessToken");
         //Создание заказа
         OrderData orderData = new OrderData(ingredientsInOrder);
         Response response2 = orderApi.sendPostRequestToCreateOrder(orderData, authToken);
         orderApi.checkResponseAfterCreatingOrder(response2);
-        //Удаление пользователя
-        userApi.deleteUser(authToken);
+
     }
 
     @Test
@@ -59,7 +69,7 @@ public class OrderCreateTest {
         List<String> ingredientsInOrder = new ArrayList<>();
         //Создание заказа
         OrderData orderData = new OrderData(ingredientsInOrder);
-        Response response = orderApi.sendPostRequestToCreateOrder(orderData, "");
+        Response response = orderApi.sendPostRequestToCreateOrder(orderData, authToken);
         orderApi.checkResponseAfterCreatingOrderWithNoIngredients(response);
     }
 
@@ -72,7 +82,12 @@ public class OrderCreateTest {
         ingredientsInOrder.add("nnn");
         //Создание заказа
         OrderData orderData = new OrderData(ingredientsInOrder);
-        Response response = orderApi.sendPostRequestToCreateOrder(orderData, "");
+        Response response = orderApi.sendPostRequestToCreateOrder(orderData, authToken);
         orderApi.checkResponseAfterCreatingOrderWithNoValidIngredients(response);
+    }
+
+    @After
+    public void deleteUser() {
+        userApi.deleteUser(authToken);
     }
 }
